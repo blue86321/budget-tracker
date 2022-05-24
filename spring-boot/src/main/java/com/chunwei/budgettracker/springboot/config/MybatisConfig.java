@@ -11,11 +11,4 @@ import org.springframework.context.annotation.Configuration;
 @MapperScan("com.chunwei.budgettracker.springboot.mapper")
 public class MybatisConfig {
 
-//    @Bean
-//    public MybatisPlusInterceptor MybatisPlusInterceptor() {
-//        MybatisPlusInterceptor mybatisPlusInterceptor = new MybatisPlusInterceptor();
-//        // 分页插件
-//        mybatisPlusInterceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
-//        return mybatisPlusInterceptor;
-//    }
 }

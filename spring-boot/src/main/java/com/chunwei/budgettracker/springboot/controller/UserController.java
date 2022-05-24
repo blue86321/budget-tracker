@@ -20,7 +20,6 @@ public class UserController {
     @Autowired
     UserService userService;
 
-    // TODO: password encryption (java bcrypt)
     @PostMapping("/register")
     public ResponseEntity<Object> register(@RequestBody Map<String, Object> map) {
         try {

@@ -33,7 +33,7 @@ function MainLayout() {
         label: "Notification",
         // antd <Badge/> has issues with Warning: "findDOMNode is deprecated in StrictMode"
         // https://github.com/ant-design/ant-design/issues/26136
-        icon: <><Badge dot style={{ position: 'absolute' }} offset={[18, -5]} /><BellOutlined /></>,
+        icon: <><Badge dot count={partnerStore.inviteList.length} style={{ position: 'absolute' }} offset={[18, -5]} /><BellOutlined /></>,
       })
     } else {
       setNotificationLinkObj({
@@ -61,7 +61,7 @@ function MainLayout() {
       setNotificationLinkObj({
         ...notificationLinkObj,
         label: "Notification",
-        icon: <><Badge dot style={{ position: 'absolute' }} offset={[18, -5]} /><BellOutlined /></>,
+        icon: <><Badge dot count={partnerStore.inviteList.length} style={{ position: 'absolute' }} offset={[18, -5]} /><BellOutlined /></>,
       })
     } else {
       setNotificationLinkObj({
