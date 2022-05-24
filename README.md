@@ -1,15 +1,15 @@
 # Budget Tracker (full-stack project)
 Author: Chunwei Chang
 
-- [Budget Tracker (full-stack project)](#budget-tracker-full-stack-project)
-  - [Introduction](#introduction)
-  - [Project Preview](#project-preview)
-  - [Tech Stack List](#tech-stack-list)
-  - [Highlight](#highlight)
-    - [Front-end](#front-end)
-    - [Back-end](#back-end)
-  - [Limitation](#limitation)
-  - [How to run on your computer](#how-to-run-on-your-computer)
+
+- [Introduction](#introduction)
+- [Project Preview](#project-preview)
+- [Tech Stack List](#tech-stack-list)
+- [Highlight](#highlight)
+  - [Front-end](#front-end)
+  - [Back-end](#back-end)
+- [Limitation](#limitation)
+- [How to run on your computer](#how-to-run-on-your-computer)
 
 
 ## Introduction
