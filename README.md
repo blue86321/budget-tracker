@@ -1,12 +1,23 @@
 # Budget Tracker (full-stack project)
 Author: Chunwei Chang
 
+- [Budget Tracker (full-stack project)](#budget-tracker-full-stack-project)
+  - [Introduction](#introduction)
+  - [Project Preview](#project-preview)
+  - [Tech Stack List](#tech-stack-list)
+  - [Highlight](#highlight)
+    - [Front-end](#front-end)
+    - [Back-end](#back-end)
+  - [Limitation](#limitation)
+  - [How to run on your computer](#how-to-run-on-your-computer)
+
+
 ## Introduction
 **Budget Tracker**
 : an website for users to track their money privitely or **with others**.
 
 **Full-Stack Project**
-- **Front-end**: `React` + `MobX`, [Front-end Priview](http://localhost:8080) (test data)
+- **Front-end**: `React` + `MobX`, [Front-end Priview](https://blue86321.github.io/budget-tracker/) (test data)
 - **Back-end**: `SpringBoot` + `MyBatis`, SSM (Spring-SpringMVC-MyBatis) structure
 
 
