@@ -1,0 +1,46 @@
+.book-header {
+  margin-bottom: 16px;
+}
+
+.content-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.book-carousel-wrapper {
+  display: flex;
+  margin-right: 3em;
+
+  .book-carousel {
+    width: 300px;
+  }
+
+  button[class*="carousel-arrow"] {
+    height: inherit;
+    background-color: rgba(255, 255, 255, 0.3);
+    z-index: 2;
+    padding: 10px;
+    font-weight: bold;
+  }
+
+  .carousel-arrow-left {
+    left: 30px;
+  }
+
+  .carousel-arrow-right {
+    right: 30px;
+  }
+
+  .carousel-element {
+    color: #fff;
+  }
+
+  .disable-action-btn {
+    .anticon {
+      cursor: default;
+      &:hover {
+        color: gray;
+      }
+    }
+  }
+}
