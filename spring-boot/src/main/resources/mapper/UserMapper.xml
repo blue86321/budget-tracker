@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chunwei.budgettracker.springboot.mapper.UserMapper">
+
+    <select id="getInvitation" resultType="com.chunwei.budgettracker.springboot.dto.InvitationDto">
+        SELECT
+            book_invite.id AS invite_id
+            ,user.username
+            ,user.nickname
+            ,book.id AS bookId
+            ,book.name AS bookName
+        FROM
+            book_invite
+            ,book
+            ,user
+        WHERE
+            book_invite.inviter_id = user.id
+            AND book_invite.book_id = book.id
+            AND book_invite.invitee_id = #{userId}
+            AND book_invite.status = 0  -- pending
+    </select>
+
+    <select id="getPartnerIdList" resultType="long">
+        SELECT DISTINCT
+            CASE
+                WHEN inviter_id = #{userId} THEN invitee_id
+                ELSE inviter_id END AS partner_id
+        FROM
+            book_invite
+        WHERE
+            (inviter_id = #{userId} OR invitee_id = #{userId}) AND status = 1
+    </select>
+
+    <select id="getPartnerList" resultMap="PartnerDtoResultMap">
+        SELECT
+            user.username AS username
+            ,user.nickname AS nickname
+            ,book.id AS book_id
+            ,book.name AS book_name
+            ,t_ptn.role AS partner_role
+            ,COALESCE(t_user_finance.expense, 0) AS partner_expense
+            ,COALESCE(t_user_finance.income, 0) AS partner_income
+            ,COALESCE(t_bk_finance.expense, 0) AS book_expense
+            ,COALESCE(t_bk_finance.income, 0) AS book_income
+        FROM (
+            -- 1. partner id and book id
+            SELECT
+                book_user.user_id
+                ,book_user.book_id
+                ,book_user.role
+            FROM
+                 book_user
+            WHERE
+                book_user.user_id != #{userId}
+                AND book_user.book_id IN
+                    <foreach item="bookId" index="index" collection="authBookIdList" open="(" separator="," close=")">
+                        #{bookId}
+                    </foreach>
+        ) t_ptn
+        INNER JOIN
+            user
+        ON t_ptn.user_id = user.id
+        INNER JOIN
+            book
+        ON t_ptn.book_id = book.id
+        LEFT JOIN (
+            -- 2. user book finance stat
+            SELECT
+                item.user_id
+                ,book_item.book_id
+                ,SUM(CASE WHEN item.type = 'expense' THEN item.amount END) AS expense
+                ,SUM(CASE WHEN item.type = 'income' THEN item.amount END) AS income
+            FROM
+                book_item
+                ,item
+            WHERE
+                book_item.item_id = item.id
+                AND book_item.book_id IN
+                    <foreach item="bookId" index="index" collection="authBookIdList" open="(" separator="," close=")">
+                        #{bookId}
+                    </foreach>
+            GROUP BY
+                item.user_id
+                ,book_item.book_id
+        ) t_user_finance
+        ON t_ptn.user_id = t_user_finance.user_id
+        AND t_ptn.book_id = t_user_finance.book_id
+        LEFT JOIN (
+            -- 3. whole book finance stat
+            SELECT
+                book.id AS book_id
+                ,SUM(CASE WHEN item.type = 'expense' THEN item.amount END) AS expense
+                ,SUM(CASE WHEN item.type = 'income' THEN item.amount END) AS income
+            FROM
+                book
+                ,book_item
+                ,item
+            WHERE
+                book.id = book_item.book_id
+                AND book_item.item_id = item.id
+                AND book.id IN
+                    <foreach item="bookId" index="index" collection="authBookIdList" open="(" separator="," close=")">
+                        #{bookId}
+                    </foreach>
+            GROUP BY
+                book.id
+        ) t_bk_finance
+        ON t_ptn.book_id = t_bk_finance.book_id
+    </select>
+
+
+    <select id="getUserStat" resultType="com.chunwei.budgettracker.springboot.dto.UserStatDto">
+        SELECT
+            t_user.username
+            ,t_user.nickname
+            ,t_item.self_item_cnt
+            ,t_item.self_expense
+            ,t_item.self_income
+            ,t_item.total_item_cnt
+            ,t_item.total_expense
+            ,t_item.total_income
+            ,t_book.self_book_cnt
+            ,t_book.total_book_cnt
+            ,t_ptn.partner_cnt
+        FROM (
+            -- 1. user info
+            SELECT
+                id AS user_id
+                ,username
+                ,nickname
+            FROM user
+            WHERE id = #{userId}
+        ) t_user
+        LEFT JOIN (
+            -- 2. item
+            SELECT
+                user_id
+                ,COUNT(DISTINCT CASE WHEN is_self = 1 THEN item_id END) AS self_item_cnt
+                ,SUM(CASE WHEN is_self = 1 AND type = 'expense' THEN amount END) AS self_expense
+                ,SUM(CASE WHEN is_self = 1 AND type = 'income' THEN amount END) AS self_income
+                ,COUNT(DISTINCT item_id) AS total_item_cnt
+                ,SUM(CASE WHEN type = 'expense' THEN amount END) AS total_expense
+                ,SUM(CASE WHEN type = 'income' THEN amount END) AS total_income
+            FROM (
+                 SELECT DISTINCT
+                     book_user.user_id
+                     ,CASE WHEN item.user_id = #{userId} THEN 1 ELSE 0 END AS is_self
+                     ,item.id AS item_id
+                     ,item.type
+                     ,item.amount
+                 FROM
+                     book_user
+                     ,book_item
+                     ,item
+                 WHERE
+                     book_user.book_id = book_item.book_id
+                     AND book_item.item_id = item.id
+                     AND book_user.user_id = #{userId}
+            ) t_dist_item
+            GROUP BY
+                user_id
+        ) t_item
+        ON t_user.user_id = t_item.user_id
+        LEFT JOIN (
+            -- 3. book
+            SELECT
+                user_id
+                ,COUNT(DISTINCT CASE WHEN role = 'author' THEN book_id END) AS self_book_cnt
+                ,COUNT(DISTINCT book_id) AS total_book_cnt
+            FROM book_user
+            WHERE user_id = #{userId}
+            GROUP BY user_id
+        ) t_book
+        ON t_user.user_id = t_book.user_id
+        LEFT JOIN (
+            -- 4. partner
+            SELECT
+                #{userId} AS user_id
+                ,COUNT(DISTINCT
+                    CASE WHEN inviter_id = #{userId} THEN invitee_id ELSE inviter_id END
+                ) AS partner_cnt
+            FROM
+                book_invite
+            WHERE
+                (invitee_id = #{userId} OR inviter_id = #{userId})
+                AND status = 1
+        ) t_ptn
+        ON t_user.user_id = t_ptn.user_id
+    </select>
+
+
+    <select id="getUserRecentDetailAllBook" resultType="com.chunwei.budgettracker.springboot.dto.RecentFinanceDto">
+        SELECT
+            t_dt.date
+            ,COALESCE(SUM(CASE WHEN type = 'expense' THEN amount END), 0) AS expense
+            ,COALESCE(SUM(CASE WHEN type = 'income' THEN amount END), 0) AS income
+        FROM (
+             -- 1.date
+             SELECT
+                 date
+             FROM (
+                 SELECT
+                    adddate(#{startDate}, t1.i*10 + t0.i) AS date
+                 FROM
+                     (SELECT 0 i union SELECT 1 union SELECT 2 union SELECT 3 union SELECT 4 union SELECT 5 union SELECT 6 union SELECT 7 union SELECT 8 union SELECT 9) t0,
+                     (SELECT 0 i union SELECT 1 union SELECT 2 union SELECT 3 union SELECT 4 union SELECT 5 union SELECT 6 union SELECT 7 union SELECT 8 union SELECT 9) t1
+             ) t_filter
+             WHERE
+                 date <![CDATA[ < ]]> DATE_ADD(#{startDate}, INTERVAL 1 MONTH)
+        ) t_dt LEFT JOIN (
+            -- 2. distinct item
+            SELECT DISTINCT
+                item.date
+                ,item.id AS item_id
+                ,item.type
+                ,item.amount
+            FROM
+                book_user
+               ,book_item
+               ,item
+            WHERE
+                book_user.book_id = book_item.book_id
+                AND book_item.item_id = item.id
+                AND book_user.user_id = #{userId}
+                AND item.date >= #{startDate}
+                AND item.date <![CDATA[ < ]]> DATE_ADD(#{startDate}, INTERVAL 1 MONTH)
+        ) t_dist_item
+        ON t_dt.date = t_dist_item.date
+        GROUP BY
+            t_dt.date
+    </select>
+
+    <select id="getUserRecentDetailPersonal" resultType="com.chunwei.budgettracker.springboot.dto.RecentFinanceDto">
+        SELECT
+            t_dt.date
+            ,COALESCE(t_item.self_expense, 0) expense
+            ,COALESCE(t_item.self_income, 0) income
+        FROM (
+             -- 1.date
+             SELECT
+                 date
+             FROM (
+                 SELECT
+                    adddate(#{startDate}, t1.i*10 + t0.i) AS date
+                 FROM
+                     (SELECT 0 i union SELECT 1 union SELECT 2 union SELECT 3 union SELECT 4 union SELECT 5 union SELECT 6 union SELECT 7 union SELECT 8 union SELECT 9) t0,
+                     (SELECT 0 i union SELECT 1 union SELECT 2 union SELECT 3 union SELECT 4 union SELECT 5 union SELECT 6 union SELECT 7 union SELECT 8 union SELECT 9) t1
+             ) t_filter
+             WHERE
+                 date <![CDATA[ < ]]> DATE_ADD(#{startDate}, INTERVAL 1 MONTH)
+        ) t_dt LEFT JOIN (
+            -- 2. distinct item
+            SELECT
+                date
+                ,SUM(CASE WHEN type = 'expense' THEN amount END) AS self_expense
+                ,SUM(CASE WHEN type = 'income' THEN amount END) AS self_income
+            FROM
+               item
+            WHERE
+                user_id = #{userId}
+                AND date >= #{startDate}
+                AND date <![CDATA[ < ]]> DATE_ADD(#{startDate}, INTERVAL 1 MONTH)
+            GROUP BY
+                date
+        ) t_item
+        ON t_dt.date = t_item.date
+    </select>
+
+    <resultMap id="PartnerDtoResultMap" type="com.chunwei.budgettracker.springboot.dto.PartnerDto">
+        <id column="username" property="username"/>
+        <result column="nickname" property="nickname"/>
+        <collection property="bookStatList" ofType="com.chunwei.budgettracker.springboot.dto.BookPartnerStatDto">
+            <id column="book_id" property="bookId"/>
+            <result column="book_name" property="bookName"/>
+            <result column="partner_role" property="partnerRole"/>
+            <result column="partner_expense" property="partnerExpense"/>
+            <result column="partner_income" property="partnerIncome"/>
+            <result column="book_expense" property="bookExpense"/>
+            <result column="book_income" property="bookIncome"/>
+        </collection>
+    </resultMap>
+</mapper>

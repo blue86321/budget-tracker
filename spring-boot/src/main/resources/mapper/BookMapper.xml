@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chunwei.budgettracker.springboot.mapper.BookMapper">
+    <select id="getRelatedBooksByUserId" resultType="com.chunwei.budgettracker.springboot.dto.BookUserDto">
+        SELECT
+            book.id
+            ,book_user.role
+            ,book.name
+            ,book.create_time
+        FROM
+             book
+            ,book_user
+        WHERE
+            book.id = book_user.book_id
+            AND book_user.user_id  = #{userId}
+    </select>
+
+    <select id="getAuthBookIdList" resultType="Long">
+        SELECT DISTINCT book_id
+        FROM book_user
+        WHERE user_id  = #{userId}
+    </select>
+
+    <select id="getRelatedBooksDetailByUserId" resultType="com.chunwei.budgettracker.springboot.dto.BookUserDto">
+        SELECT
+             book.id
+             ,book_user.role
+             ,book.name
+             ,book.create_time
+        FROM
+            book
+           ,book_user
+        WHERE
+            book.id = book_user.book_id
+          AND book_user.user_id  = #{userId}
+    </select>
+
+    <select id="getBookListInfo" resultMap="BookListInfoResultMap">
+        SELECT
+            t_bk_all.*
+            ,t_bk_ptn.username AS partner_username
+            ,t_bk_ptn.nickname AS partner_nickname
+        FROM (
+            -- 1. total data
+            SELECT
+                t_bk_info.book_id
+                ,t_bk_info.book_name
+                ,t_bk_info.create_time
+                ,t_bk_info.last_modified_time
+                ,t_bk_info.author_username
+                ,t_bk_info.author_nickname
+                ,t_bk_info.can_user_edit
+                ,COALESCE(t_bk_item.total_income, 0) AS total_income
+                ,COALESCE(t_bk_item.total_expense, 0) AS total_expense
+            FROM (
+                -- 1.1. book author info
+                SELECT
+                    book.id AS book_id
+                    ,book.name AS book_name
+                    ,book.create_time
+                    ,book.last_modified_time
+                    ,user.username AS author_username
+                    ,user.nickname AS author_nickname
+                    ,CASE WHEN user.id = #{userId} THEN 1 ELSE 0 END AS can_user_edit
+                FROM
+                    book
+                    ,user
+                WHERE
+                    book.user_id = user.id
+                    AND book.id IN
+                        <foreach item="bookId" index="index" collection="bookIdList" open="(" separator="," close=")">
+                            #{bookId}
+                        </foreach>
+            ) t_bk_info LEFT JOIN (
+                -- 1.2. book item total
+                SELECT
+                    book_item.book_id
+                    ,SUM(CASE WHEN item.type = "income" THEN item.amount ELSE 0 END) AS total_income
+                    ,SUM(CASE WHEN item.type = "expense" THEN item.amount ELSE 0 END) AS total_expense
+                FROM
+                    item
+                    ,book_item
+                WHERE
+                    book_item.item_id = item.id
+                    AND book_item.book_id IN
+                    <foreach item="bookId" index="index" collection="bookIdList" open="(" separator="," close=")">
+                        #{bookId}
+                    </foreach>
+                GROUP BY
+                    book_item.book_id
+            ) t_bk_item ON t_bk_info.book_id = t_bk_item.book_id
+        ) t_bk_all LEFT JOIN (
+            -- 2. book partner (include user himself)
+            SELECT
+                book_user.book_id
+                ,user.username
+                ,user.nickname
+            FROM
+                book_user
+                ,user
+            WHERE
+                book_user.user_id = user.id
+                AND book_user.book_id IN
+                <foreach item="bookId" index="index" collection="bookIdList" open="(" separator="," close=")">
+                    #{bookId}
+                </foreach>
+        ) t_bk_ptn
+        ON t_bk_all.book_id = t_bk_ptn.book_id
+    </select>
+
+    <select id="getBookListRecentDetail" resultMap="BookListRecentDetailResultMap">
+        SELECT
+            t_dt_frame.book_id
+            ,t_dt_frame.date
+            ,COALESCE(t_detail.income, 0) AS income
+            ,COALESCE(t_detail.expense, 0) AS expense
+        FROM (
+            -- 2.1.date, book_id frame
+            SELECT
+                t_dt.date
+                ,t_bk.id AS book_id
+            FROM (
+                -- 2.1.1.date
+                SELECT
+                    1 AS join_key
+                    ,date
+                FROM (
+                    SELECT
+                        adddate(#{startDate}, t1.i*10 + t0.i) AS date
+                    FROM
+                        (SELECT 0 i union SELECT 1 union SELECT 2 union SELECT 3 union SELECT 4 union SELECT 5 union SELECT 6 union SELECT 7 union SELECT 8 union SELECT 9) t0,
+                        (SELECT 0 i union SELECT 1 union SELECT 2 union SELECT 3 union SELECT 4 union SELECT 5 union SELECT 6 union SELECT 7 union SELECT 8 union SELECT 9) t1
+                ) t_filter
+                WHERE
+                date <![CDATA[ < ]]> DATE_ADD(#{startDate}, INTERVAL 1 MONTH)
+            ) t_dt LEFT JOIN (
+                -- 2.1.2.book_id
+                SELECT id, 1 AS join_key
+                FROM book
+                WHERE id IN
+                    <foreach item="bookId" index="index" collection="bookIdList" open="(" separator="," close=")">
+                        #{bookId}
+                    </foreach>
+            ) t_bk ON t_dt.join_key = t_bk.join_key
+        ) t_dt_frame LEFT JOIN (
+            -- 2.2. detail
+            SELECT
+                book.id AS book_id
+                ,item.date
+                ,SUM(CASE WHEN type = "income" THEN amount ELSE 0 END) AS income
+                ,SUM(CASE WHEN type = "expense" THEN amount ELSE 0 END) AS expense
+            FROM
+                book
+                ,book_item
+                ,item
+            WHERE
+                book.id = book_item.book_id
+                AND book_item.item_id = item.id
+                AND item.date >= #{startDate}
+                AND item.date <![CDATA[ < ]]> DATE_ADD(#{startDate}, INTERVAL 1 MONTH)
+                AND book.id IN
+                    <foreach item="bookId" index="index" collection="bookIdList" open="(" separator="," close=")">
+                        #{bookId}
+                    </foreach>
+            GROUP BY
+                book.id
+                ,item.date
+        ) t_detail
+        ON t_dt_frame.date = t_detail.date
+        AND t_dt_frame.book_id = t_detail.book_id
+    </select>
+
+    <update id="updateLastModifiedTimeById">
+        UPDATE book SET last_modified_time = #{updateTime} WHERE id = #{bookId}
+    </update>
+
+    <resultMap id="BookListRecentDetailResultMap" type="com.chunwei.budgettracker.springboot.dto.BookRecentDetailDto">
+        <id column="book_id" property="bookId"/>
+        <collection property="recentDataList" ofType="com.chunwei.budgettracker.springboot.dto.RecentFinanceDto">
+            <result column="date" property="date" javaType="String"/>
+            <result column="income" property="income" javaType="BigDecimal"/>
+            <result column="expense" property="expense" javaType="BigDecimal"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="BookListInfoResultMap" type="com.chunwei.budgettracker.springboot.dto.BookInfoDto">
+        <id column="book_id" property="bookId"/>
+        <result column="author_username" property="authorUsername"/>
+        <result column="author_nickname" property="authorNickname"/>
+        <result column="book_name" property="bookName"/>
+        <result column="can_user_edit" property="canUserEdit"/>
+        <result column="create_time" property="createTime"/>
+        <result column="last_modified_time" property="lastModifiedTime"/>
+        <result column="total_income" property="totalIncome"/>
+        <result column="total_expense" property="totalExpense"/>
+        <collection property="partnerList" ofType="com.chunwei.budgettracker.springboot.dto.BookPartnerDescriptionDto">
+            <result column="partner_username" property="username" javaType="String"/>
+            <result column="partner_nickname" property="nickname" javaType="String"/>
+        </collection>
+    </resultMap>
+</mapper>

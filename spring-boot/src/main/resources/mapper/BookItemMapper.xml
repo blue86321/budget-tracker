@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chunwei.budgettracker.springboot.mapper.BookItemMapper">
+
+    <select id="verifyAuthForItems" parameterType="arraylist" resultType="Integer">
+        SELECT
+            COUNT(1) AS cnt
+        FROM
+            book_item
+        WHERE
+            item_id IN
+                <foreach item="itemId" index="index" collection="itemIds" open="(" separator="," close=")">
+                    #{itemId}
+                </foreach>
+    </select>
+
+
+    <delete id="deleteBatchByItemAndBookIdList" parameterType="arraylist">
+        DELETE FROM book_item
+        WHERE
+            item_id IN
+                <foreach item="itemId" index="index" collection="itemIdList" open="(" separator="," close=")">
+                    #{itemId}
+                </foreach>
+            AND book_id IN
+                <foreach item="bookId" index="index" collection="bookIdList" open="(" separator="," close=")">
+                    #{bookId}
+                </foreach>
+    </delete>
+
+    <delete id="deleteByItemId" parameterType="Long">
+        DELETE FROM book_item
+        WHERE
+            item_id = #{itemId}
+            AND book_id IN
+                <foreach item="bookId" index="index" collection="bookIdList" open="(" separator="," close=")">
+                    #{bookId}
+                </foreach>
+    </delete>
+</mapper>

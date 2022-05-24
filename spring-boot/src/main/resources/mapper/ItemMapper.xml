@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chunwei.budgettracker.springboot.mapper.ItemMapper">
+    <select id="countAuthItem" parameterType="arraylist" resultType="Integer">
+        SELECT COUNT(DISTINCT book_item.item_id) AS authCnt
+        FROM
+            book_item
+            ,book_user
+        WHERE
+            book_item.book_id = book_user.book_id
+            AND book_user.user_id = #{userId}
+            AND book_item.item_id IN
+                <foreach item="itemId" index="index" collection="itemIdList" open="(" separator="," close=")">
+                    #{itemId}
+                </foreach>
+            AND book_user.book_id IN
+                <foreach item="bookId" index="index" collection="authBookIdList" open="(" separator="," close=")">
+                    #{bookId}
+                </foreach>
+    </select>
+
+    <select id="getCurrentPageItemIds" parameterType="HashMap" resultType="Long">
+        SELECT item.id
+        FROM item
+        WHERE
+            1 = 1
+            <if test="map.userIdList != null">
+                AND user_id IN
+                <foreach item="userId" index="index" collection="map.userIdList" open="(" separator="," close=")">
+                    #{userId}
+                </foreach>
+            </if>
+            <if test="map.filter != null">
+                <if test="map.filter.dateBegin != null and map.filter.dateEnd != null">
+                    AND date >= #{map.filter.dateBegin} AND date <![CDATA[ <= ]]> #{map.filter.dateEnd}
+                </if>
+                <if test="map.filter.type != null">
+                    AND type = #{map.filter.type}
+                </if>
+                <if test="map.filter.category != null">
+                    AND category = #{map.filter.category}
+                </if>
+            </if>
+        LIMIT #{map.limitFrom}, #{map.cacheNum}
+    </select>
+
+    <select id="filterItemIdsByBookName" resultType="Long">
+        SELECT
+            item.id AS item_id
+        FROM
+            item
+            ,book_item
+            ,book
+        WHERE
+            item.id = book_item.item_id
+            AND book_item.book_id = book.id
+            AND item.user_id = #{userId}
+            AND item.id IN
+            <foreach item="itemId" index="index" collection="itemIdList" open="(" separator="," close=")">
+                #{itemId}
+            </foreach>
+            AND book.name = #{bookName}
+    </select>
+
+    <select id="getItemDetailByUserId" resultMap="ItemDetailResultMap">
+        SELECT
+            item.id AS item_id
+            ,item.date
+            ,item.type
+            ,item.amount
+            ,item.category
+            ,item.note
+            ,item.create_time
+            ,book.id AS book_id
+            ,book.name AS book_name
+            ,user.username AS author_username
+            ,user.nickname AS author_nickname
+        FROM
+            item
+            ,book_item
+            ,book
+            ,user
+        WHERE
+            item.id = book_item.item_id
+            AND book_item.book_id = book.id
+            AND item.user_id = user.id
+            AND item.id IN
+                <foreach item="itemId" index="index" collection="itemIdList" open="(" separator="," close=")">
+                    #{itemId}
+                </foreach>
+            AND book_item.book_id IN
+                <foreach item="bookId" index="index" collection="bookIdList" open="(" separator="," close=")">
+                    #{bookId}
+                </foreach>
+        ORDER BY
+            item.date DESC
+            ,item.create_time DESC
+    </select>
+
+    <select id="getItemCntByUserId" resultType="integer">
+        SELECT COUNT(id) AS item_cnt
+        FROM item
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="getNoBookItemIdList" resultType="Long">
+        SELECT
+            t_item.item_id
+        FROM (
+            -- item
+            SELECT
+                item.id AS item_id
+            FROM item
+            WHERE
+                item.id IN
+                <foreach item="itemId" index="index" collection="itemIdList" open="(" separator="," close=")">
+                    #{itemId}
+                </foreach>
+        ) t_item
+        LEFT JOIN book_item ON t_item.item_id = book_item.item_id
+        WHERE
+            book_item.item_id IS NULL
+    </select>
+
+    <resultMap id="ItemDetailResultMap" type="com.chunwei.budgettracker.springboot.dto.ItemDetailDto">
+        <id column="item_id" property="itemId"/>
+        <result column="date" property="date"/>
+        <result column="type" property="type"/>
+        <result column="amount" property="amount"/>
+        <result column="category" property="category"/>
+        <result column="note" property="note"/>
+        <result column="create_time" property="createTime"/>
+        <result column="author_username" property="authorUsername"/>
+        <result column="author_nickname" property="authorNickname"/>
+        <collection property="bookList" ofType="com.chunwei.budgettracker.springboot.dto.ItemDetailNestedBookDto">
+            <id column="book_id" property="bookId"/>
+            <result column="book_name" property="bookName"/>
+        </collection>
+    </resultMap>
+</mapper>
