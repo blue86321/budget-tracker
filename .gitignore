@@ -1,0 +1,59 @@
+.DS_Store
+
+########## Spring-boot ##########
+spring-boot/HELP.md
+spring-boot/target/
+spring-boot/!.mvn/wrapper/maven-wrapper.jar
+spring-boot/!**/src/main/**/target/
+spring-boot/!**/src/test/**/target/
+
+### STS ###
+spring-boot/.apt_generated
+spring-boot/.classpath
+spring-boot/.factorypath
+spring-boot/.project
+spring-boot/.settings
+spring-boot/.springBeans
+spring-boot/.sts4-cache
+
+### IntelliJ IDEA ###
+spring-boot/.idea
+spring-boot/*.iws
+spring-boot/*.iml
+spring-boot/*.ipr
+
+### NetBeans ###
+spring-boot/nbproject/private/
+spring-boot/nbbuild/
+spring-boot/dist/
+spring-boot/nbdist/
+spring-boot/.nb-gradle/
+spring-boot/build/
+spring-boot/!**/src/main/**/build/
+spring-boot/!**/src/test/**/build/
+
+### VS Code ###
+spring-boot/.vscode/
+
+########## React ##########
+# dependencies
+react-app/node_modules
+react-app/.pnp
+react-app/.pnp.js
+
+# testing
+react-app/coverage
+
+# production
+react-app/build
+
+# misc
+react-app/.DS_Store
+react-app/.env.local
+react-app/.env.development.local
+react-app/.env.test.local
+react-app/.env.production.local
+
+react-app/npm-debug.log*
+react-app/yarn-debug.log*
+react-app/yarn-error.log*
