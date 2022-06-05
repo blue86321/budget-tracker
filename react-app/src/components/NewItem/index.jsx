@@ -17,9 +17,9 @@ const NewItemForm = ({ visible, onCreate, onCancel }) => {
   useEffect(() => {
     financeStore.getCategoryList()
     bookStore.getBookList()
-  }, [])
+  }, [bookStore, financeStore])
 
-  const onNewCategoyChange = e => {
+  const onNewCategoryChange = e => {
     setNewCategory(e.target.value)
   }
 
@@ -33,7 +33,7 @@ const NewItemForm = ({ visible, onCreate, onCancel }) => {
 
   const onOk = (visible) => {
     if (form.getFieldValue("amount") <= 0) {
-      message.error("amount must be at leat 0.01")
+      message.error("amount must be at least 0.01")
     } else {
       form
       .validateFields()
@@ -123,7 +123,7 @@ const NewItemForm = ({ visible, onCreate, onCancel }) => {
                 {menu}
                 <Divider style={{ margin: '8px 0' }} />
                 <Space align="center" style={{ padding: '0 8px 4px' }}>
-                  <Input placeholder="new category" value={newCategory} onChange={onNewCategoyChange} />
+                  <Input placeholder="new category" value={newCategory} onChange={onNewCategoryChange} />
                   <Typography.Link onClick={addCategory} style={{ whiteSpace: 'nowrap' }}>
                     <PlusOutlined />Add
                   </Typography.Link>

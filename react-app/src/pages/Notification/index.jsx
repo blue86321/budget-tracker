@@ -11,7 +11,7 @@ const Notification = () => {
 
   useEffect(() => {
     partnerStore.getInvite()
-  }, [])
+  }, [partnerStore])
 
 
   const onClick = async (values, accept) => {

@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 const TABLE_CACHE_ITEM_NUM = 100
 
-export default class FinanceStroe {
+export default class FinanceStore {
   itemList = []
   categoryList = []
   typeList = []

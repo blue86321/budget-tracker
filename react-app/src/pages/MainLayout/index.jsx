@@ -54,7 +54,7 @@ function MainLayout() {
   useEffect(() => {
     userStore.getUserInfo()
     partnerStore.getInvite()
-  }, [])
+  }, [partnerStore, userStore])
 
   useEffect(() => {
     if (collapsed) {
@@ -70,7 +70,7 @@ function MainLayout() {
         icon: <BellOutlined />
       })
     }
-  }, [partnerStore.inviteList])
+  }, [collapsed, notificationLinkObj, partnerStore.inviteList])
 
   const logoutConfirm = () => {
     Modal.confirm({

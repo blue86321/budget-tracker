@@ -39,7 +39,7 @@ class RootTest {
       {
         bookId: "1",
         createTime: "2022-05-14T07:15:00.000+00:00",
-        name: "Peronsal",
+        name: "Personal",
         role: "author",
       },
       {
@@ -159,7 +159,7 @@ class RootTest {
         bookId: 25,
         bookName: "School Life",
         inviteId: 13,
-        nickname: "Jogn",
+        nickname: "John",
         username: "zxcv",
       },
     ]

@@ -23,7 +23,7 @@ const Book = () => {
   useEffect(() => {
     bookStore.getBookInfoList()
     bookStore.getBookRecentDetailList(moment().format("YYYY-MM-01"))
-  }, [])
+  }, [bookStore])
 
 
   // carousel card action

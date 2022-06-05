@@ -14,7 +14,7 @@ const { RangePicker } = DatePicker
 const Finance = () => {
 
   const [loading, setLoading] = useState(false)
-  const [selectedRowKeys, setSeletedRowKeys] = useState([])
+  const [selectedRowKeys, setSelectedRowKeys] = useState([])
   const [tableLoading, setTableLoading] = useState(false)
   const { financeStore, bookStore } = useStore()
   const [form] = Form.useForm()
@@ -24,7 +24,7 @@ const Finance = () => {
     financeStore.getTypeList()
     financeStore.getCategoryList()
     bookStore.getBookList()
-  }, [])
+  }, [bookStore, financeStore])
 
 
   const updateTable = async (newPageParams) => {
@@ -73,7 +73,7 @@ const Finance = () => {
 
   const deleteRecord = async (record) => {
     await financeStore.deleteItem(record)
-    setSeletedRowKeys(selectedRowKeys.filter(key => key !== record.key))
+    setSelectedRowKeys(selectedRowKeys.filter(key => key !== record.key))
   }
 
   const deleteBatchItems = async () => {
@@ -83,14 +83,14 @@ const Finance = () => {
     } catch (e) {
       message.error(e)
     }
-    setSeletedRowKeys([])
+    setSelectedRowKeys([])
     setLoading(false)
   }
 
   const rowSelection = {
     selectedRowKeys,
     onChange: selectedRowKeys => {
-      setSeletedRowKeys(selectedRowKeys)
+      setSelectedRowKeys(selectedRowKeys)
     }
   }
 
@@ -172,7 +172,6 @@ const Finance = () => {
       title: 'Book',
       dataIndex: 'book',
       width: 200,
-      ellipsis: true,
       ellipsis: {
         showTitle: false,
       },

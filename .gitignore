@@ -33,7 +33,7 @@ spring-boot/!**/src/main/**/build/
 spring-boot/!**/src/test/**/build/
 
 ### VS Code ###
-spring-boot/.vscode/
+**/.vscode/
 
 ########## React ##########
 # dependencies

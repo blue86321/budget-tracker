@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 import BookStore from "./book.store";
-import FinanceStroe from "./finance.store";
+import FinanceStore from "./finance.store";
 import LoginStore from "./login.store";
 import PartnerStore from "./partner.store";
 import UserStore from "./user.store";
@@ -11,7 +11,7 @@ class RootStore {
   constructor() {
     this.loginStore = new LoginStore()
     this.userStore = new UserStore()
-    this.financeStore = new FinanceStroe()
+    this.financeStore = new FinanceStore()
     this.bookStore = new BookStore()
     this.partnerStore = new PartnerStore()
     // ...

@@ -29,7 +29,7 @@ const Dashboard = () => {
     userStore.getUserStat()
     userStore.getUserPersonalRecentDataList(moment().format("YYYY-MM-01"))
     userStore.getUserAllBookRecentDataList(moment().format("YYYY-MM-01"))
-  }, [])
+  }, [userStore])
 
 
   return (

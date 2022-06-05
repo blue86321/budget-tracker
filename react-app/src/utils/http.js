@@ -63,9 +63,9 @@ const refreshInterceptor = http.interceptors.response.use(
           .then(res => {
             setLocalToken(res.data?.token)
             // can remove this, cause we will get token in request interceptor
-            // error.response.config.headers.Authorization = `Bearer ${res.data?.toekn}`
+            // error.response.config.headers.Authorization = `Bearer ${res.data?.token}`
 
-            // keep updating refreshToekn, so that a user would never expire
+            // keep updating refreshToken, so that a user would never expire
             if (res.data?.refreshToken) {
               setLocalRefreshToken(res.data?.refreshToken)
             }

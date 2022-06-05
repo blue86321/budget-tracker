@@ -32,8 +32,8 @@ const Register = () => {
       navigate('/', { replace: true })
       message.success('Success', 2)
     } catch (e) {
-      const errorMessgae = e.response?.data?.message || e.message
-      message.error(errorMessgae, 3)
+      const errorMessage = e.response?.data?.message || e.message
+      message.error(errorMessage, 3)
     }
   }
 

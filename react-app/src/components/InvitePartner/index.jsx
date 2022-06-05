@@ -59,7 +59,8 @@ const InvitePartner = ({ bookInfo }) => {
   const onCreate = async (partner, visible) => {
     try {
       if (partner.username === userStore.userInfo.username) {
-        throw "Cannot invite yourself"
+        const errorMessage = "Cannot invite yourself";
+        throw errorMessage
       }
       await partnerStore.sendInvitation(partner, bookInfo)
       message.success('send a invitation successfully')

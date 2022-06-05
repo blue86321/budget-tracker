@@ -26,7 +26,8 @@ export default class LoginStore {
         setLocalRefreshToken(res.data.refreshToken)
       }
     } else {
-      throw 'Login failed'
+      const errorMessage = 'Login failed'
+      throw errorMessage
     }
   }
 

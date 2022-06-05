@@ -1,5 +1,5 @@
 import { BookOutlined, DesktopOutlined, DollarOutlined, ShoppingOutlined, StarOutlined, TeamOutlined } from '@ant-design/icons';
-import { Avatar, Card, List, message, Popconfirm, Statistic, Table, Tabs, Tooltip } from 'antd';
+import { Avatar, Button, Card, List, message, Popconfirm, Statistic, Table, Tabs, Tooltip } from 'antd';
 import { observer } from 'mobx-react-lite';
 import { useEffect } from 'react';
 import { useStore } from 'stores';
@@ -18,7 +18,7 @@ const Partner = () => {
   useEffect(() => {
     partnerStore.getPartnerList()
     bookStore.getBookList()
-  }, [])
+  }, [bookStore, partnerStore])
 
   // for 1st tab
   // max of income + expense
@@ -124,7 +124,7 @@ const Partner = () => {
             cancelText="No"
             onConfirm={() => onRevoke(record)}
           >
-            <a>Revoke</a>
+            <Button type="link">Revoke</Button>
           </Popconfirm>
       ),
     },
