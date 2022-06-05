@@ -16,13 +16,13 @@ Author: Chunwei Chang
 
 ## Introduction
 **Budget Tracker**
-- A web application for users to track their money privitely or **with others**.
+- A web application for users to track their money privately or **with others**.
 - A user have multiple **books**, they can invite friends to track money in assigned books together.
 - A money record can share in many books.
 ![](https://github.com/blue86321/budget-tracker/blob/master/project_intro.png)
 
 **Full-Stack Project**
-- **Frontend**: `React` + `MobX`, [Frontend Priview](https://blue86321.github.io/budget-tracker/) (test data, some features might cause error due to the lack of backend)
+- **Frontend**: `React` + `MobX`, [Frontend Preview](https://blue86321.github.io/budget-tracker/) (test data, some features might cause error due to the lack of backend)
 - **Backend**: `SpringBoot` + `MyBatis`, SSM (Spring-SpringMVC-MyBatis) structure
 
 
@@ -34,7 +34,7 @@ Author: Chunwei Chang
 | Type     | Tool         | Version | Comment                              |
 | -------- | ------------ | ------- | ------------------------------------ |
 | Frontend | React        | 18.1.0  | functional component, hooks          |
-|          | Mobx         | 6.5.0   | manage data, similiar to `Redux`     |
+|          | Mobx         | 6.5.0   | manage data, similar to `Redux`     |
 |          | scss         |         | Sassy css, similar to `Less`         |
 |          | axios        | 0.27.2  | transfer data with backend           |
 |          | Ant Design   | 4.20.3  | UI framework                         |
@@ -113,12 +113,12 @@ Author: Chunwei Chang
 ### Backend
 - ✅ `JWT + refresh token` to ensure a request is authorized.
 - ✅ `SpringBoot` ecosystem
-  - `Spring` IOC container, easy to use `Bean` by calling  `@Autowire`.
+  - `Spring` IOC container, easy to use `Bean` by calling  `@Autowired`.
   - `Model-View-Controller` (MVC) structure.
     - Model: `MyBatis` + `MySQL`
     - View: Json Object
     - Controller: `SpringMVC` controller (Servlet)
-- ✅ Unified response obejct, `Result` is an object to wrap return value to the frontend.
+- ✅ Unified response object, `Result` is an object to wrap return value to the frontend.
     ```java
     @GetMapping("/stat")
     public ResponseEntity<Object> getUserStat(HttpServletRequest request) {
@@ -151,7 +151,7 @@ Author: Chunwei Chang
        - Visit http://localhost:3000
    2. **MySQL (Database)**
        - Import data in `./MySQLDump` to your MySQL database
-       - (Optional) Assign a username and password to opearte this schema
+       - (Optional) Assign a username and password to operate this schema
    3. **SpringBoot (Backend)**
        - Visit `./spring-boot` directory
        - Open `pom.xml` as a Maven project in your IDE
@@ -223,7 +223,7 @@ Author: Chunwei Chang
 4. Antd table, init, delete feature (only on frontend)
 
 **Backend**
-1. customized http code, re-constructure filter, JwtUtil, UserService
+1. customized http code, re-construct filter, JwtUtil, UserService
 
 
 #### May 14, 2022 - database, Service, MyBatis-Plus, [NewItem]
@@ -266,7 +266,7 @@ Author: Chunwei Chang
 1. Antd Carousel with arrows (prev, next)
 2. Carousel Card
 3. Connect carousel data and description section
-4. (draft) implement echarts in desription section
+4. (draft) implement echarts in description section
 
 **Backend**
 1. MyBatis &lt;if&gt; inject HashMap parameter
